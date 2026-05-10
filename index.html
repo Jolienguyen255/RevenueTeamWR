@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRO Dashboard · W1 May 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --border: #252830;
+    --muted: #3a3e48;
+    --text-dim: #6b7280;
+    --text: #d1d5db;
+    --white: #f4f5f7;
+    --bd: #3b82f6;
+    --mkt: #a78bfa;
+    --pn: #34d399;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --green: #22c55e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 2.5rem 4rem;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.03em;
+  }
+  .header-left p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .header-right {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── SECTION TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.3rem;
+  }
+  .tab {
+    flex: 1;
+    padding: 0.55rem 1rem;
+    border-radius: 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text); background: var(--muted); }
+  .tab.active-bd { background: rgba(59,130,246,0.15); color: var(--bd); }
+  .tab.active-mkt { background: rgba(167,139,250,0.15); color: var(--mkt); }
+  .tab.active-pn { background: rgba(52,211,153,0.15); color: var(--pn); }
+  .tab.active-all { background: rgba(244,245,247,0.08); color: var(--white); }
+
+  /* ── PANELS ── */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+  .card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── STAT TILE ── */
+  .stat { text-align: center; }
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .stat-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    margin-top: 0.2rem;
+  }
+  .up { color: var(--green); }
+  .down { color: var(--danger); }
+  .warn { color: var(--warn); }
+  .bd-c { color: var(--bd); }
+  .mkt-c { color: var(--mkt); }
+  .pn-c { color: var(--pn); }
+
+  /* ── FUNNEL ── */
+  .funnel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .funnel-row:last-child { border-bottom: none; }
+  .funnel-stage {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    width: 120px;
+    flex-shrink: 0;
+  }
+  .funnel-bar-wrap { flex: 1; background: var(--muted); border-radius: 3px; height: 6px; overflow: hidden; }
+  .funnel-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .funnel-nums {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .funnel-rr {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.63rem;
+    width: 55px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
+  }
+  .section-header:first-of-type { margin-top: 0; }
+  .section-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .badge-bd { background: rgba(59,130,246,0.12); color: var(--bd); border: 1px solid rgba(59,130,246,0.2); }
+  .badge-mkt { background: rgba(167,139,250,0.12); color: var(--mkt); border: 1px solid rgba(167,139,250,0.2); }
+  .badge-pn { background: rgba(52,211,153,0.12); color: var(--pn); border: 1px solid rgba(52,211,153,0.2); }
+  .badge-alert { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+  .badge-neutral { background: rgba(244,245,247,0.06); color: var(--text); border: 1px solid var(--border); }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  /* ── LIST ITEMS ── */
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+  }
+  .item-row:last-child { border-bottom: none; }
+  .item-name { font-size: 0.8rem; color: var(--white); font-weight: 500; }
+  .item-sub { font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem; }
+  .item-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .tag-green { background: rgba(34,197,94,0.12); color: var(--green); }
+  .tag-warn { background: rgba(245,158,11,0.12); color: var(--warn); }
+  .tag-danger { background: rgba(239,68,68,0.12); color: var(--danger); }
+  .tag-blue { background: rgba(59,130,246,0.12); color: var(--bd); }
+  .tag-purple { background: rgba(167,139,250,0.12); color: var(--mkt); }
+  .tag-teal { background: rgba(52,211,153,0.12); color: var(--pn); }
+  .tag-gray { background: rgba(244,245,247,0.06); color: var(--text-dim); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { background: var(--muted); border-radius: 3px; height: 5px; margin-top: 0.35rem; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: rgba(244,245,247,0.04);
+    border-left: 3px solid var(--muted);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.77rem;
+    color: var(--text);
+    line-height: 1.6;
+    margin-top: 0.5rem;
+  }
+  .insight.bd-left { border-left-color: var(--bd); }
+  .insight.mkt-left { border-left-color: var(--mkt); }
+  .insight.pn-left { border-left-color: var(--pn); }
+  .insight.warn-left { border-left-color: var(--warn); }
+  .insight.danger-left { border-left-color: var(--danger); }
+
+  /* ── WORKSTREAM TABLE ── */
+  .ws-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 70px;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ws-row.header-row { opacity: 0.5; font-family: 'DM Mono', monospace; font-size: 0.63rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .ws-row:last-child { border-bottom: none; }
+  .ws-name { font-size: 0.78rem; color: var(--white); }
+  .ws-owner { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--text-dim); }
+  .ws-deadline { font-family: 'DM Mono', monospace; font-size: 0.63rem; color: var(--text-dim); text-align: right; }
+  .ws-status-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    text-align: center;
+  }
+
+  /* ── OVERVIEW PANEL ── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .kpi-cell {
+    padding: 1.2rem 1.4rem;
+    border-right: 1px solid var(--border);
+  }
+  .kpi-cell:last-child { border-right: none; }
+  .kpi-cell-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .kpi-cell-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .kpi-cell-sub { font-size: 0.7rem; color: var(--text-dim); margin-top: 0.2rem; }
+
+  /* ── MEMBER ROW ── */
+  .member-row {
+    display: grid;
+    grid-template-columns: 130px 60px repeat(3, 1fr) 60px;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .member-row.hdr { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
+  .member-row:last-child { border-bottom: none; }
+  .member-name { color: var(--white); font-weight: 500; }
+  .member-okr { font-family: 'DM Mono', monospace; font-size: 0.7rem; }
+  .member-stat { font-family: 'DM Mono', monospace; font-size: 0.68rem; text-align: center; }
+
+  /* ── RED FLAG ── */
+  .red-flag {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    padding: 0.7rem 0.9rem;
+    border-radius: 7px;
+    margin-bottom: 0.5rem;
+    font-size: 0.77rem;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.15);
+  }
+  .rf-icon { flex-shrink: 0; margin-top: 0.05rem; }
+  .green-flag {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    padding: 0.7rem 0.9rem;
+    border-radius: 7px;
+    margin-bottom: 0.5rem;
+    font-size: 0.77rem;
+    background: rgba(34,197,94,0.06);
+    border: 1px solid rgba(34,197,94,0.15);
+  }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    body { padding: 1rem; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .kpi-strip { grid-template-columns: 1fr; }
+    .kpi-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* ── EDIT MODE ── */
+  .edit-toolbar {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 9999;
+    align-items: center;
+  }
+  .edit-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .edit-btn-toggle {
+    background: var(--surface);
+    color: var(--text-dim);
+  }
+  .edit-btn-toggle.active {
+    background: rgba(59,130,246,0.15);
+    color: var(--bd);
+    border-color: rgba(59,130,246,0.3);
+  }
+  .edit-btn-save {
+    background: rgba(34,197,94,0.12);
+    color: var(--green);
+    border-color: rgba(34,197,94,0.25);
+    display: none;
+  }
+  .edit-btn-save:hover { background: rgba(34,197,94,0.2); }
+  .edit-btn-add {
+    background: rgba(167,139,250,0.12);
+    color: var(--mkt);
+    border-color: rgba(167,139,250,0.25);
+    display: none;
+  }
+  .edit-pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.2s ease infinite;
+    display: none;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+
+  /* editable elements */
+  body.edit-mode [data-editable] {
+    outline: 1px dashed rgba(59,130,246,0.35);
+    border-radius: 3px;
+    cursor: text;
+    transition: outline 0.1s;
+  }
+  body.edit-mode [data-editable]:hover {
+    outline: 1.5px solid var(--bd);
+    background: rgba(59,130,246,0.06);
+  }
+  body.edit-mode [data-editable]:focus {
+    outline: 2px solid var(--bd);
+    background: rgba(59,130,246,0.08);
+  }
+  body.edit-mode .funnel-bar-wrap [data-bar] {
+    outline: 1px dashed rgba(59,130,246,0.4);
+    cursor: ew-resize;
+  }
+
+  /* inline add row */
+  .add-row-btn {
+    display: none;
+    width: 100%;
+    margin-top: 0.4rem;
+    padding: 0.4rem;
+    border-radius: 5px;
+    border: 1px dashed var(--muted);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .add-row-btn:hover { border-color: var(--bd); color: var(--bd); background: rgba(59,130,246,0.06); }
+  body.edit-mode .add-row-btn { display: block; }
+
+  /* delete handle */
+  .del-handle {
+    display: none;
+    margin-left: 0.4rem;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.7rem;
+    opacity: 0;
+    transition: opacity 0.1s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  body.edit-mode .item-row:hover .del-handle,
+  body.edit-mode .ws-row:hover .del-handle,
+  body.edit-mode .red-flag:hover .del-handle,
+  body.edit-mode .green-flag:hover .del-handle,
+  body.edit-mode .funnel-row:hover .del-handle,
+  body.edit-mode .member-row:hover .del-handle { display: inline; opacity: 0.7; }
+
+  /* toast */
+  .toast {
+    position: fixed; bottom: 5rem; right: 1.5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 0.5rem 0.9rem;
+    border-radius: 7px; font-family: 'DM Mono', monospace;
+    font-size: 0.68rem; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s; z-index: 9998;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <h1>Revenue Dashboard</h1>
+    <p>PMAX · CRO Report · W1 May 2026 · 04.05 — 10.05.2026 · Q2/2026 Week 6</p>
+  </div>
+  <div class="header-right">
+    Anh Sơn (CRO)<br>
+    Compiled: 10.05.2026
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active-all" onclick="switchTab('all')">📊 Overview</button>
+  <button class="tab" onclick="switchTab('bd')" id="tab-bd">🔵 BD Team</button>
+  <button class="tab" onclick="switchTab('mkt')" id="tab-mkt">🟣 Marketing</button>
+  <button class="tab" onclick="switchTab('pn')" id="tab-pn">🟢 Partnership</button>
+</div>
+
+<!-- ════════════════════════════════ OVERVIEW ════════════════════════════════ -->
+<div class="panel active" id="panel-all">
+
+  <div class="section-header">
+    <span class="section-badge badge-neutral">Team Pulse</span>
+    <span class="section-title">Q2 To-Date — Full Funnel Snapshot</span>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi-cell">
+      <div class="kpi-cell-label bd-c">BD Team</div>
+      <div class="kpi-cell-val bd-c">4%</div>
+      <div class="kpi-cell-sub">GP2 New / 2.93B target · 125M actual</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-cell-label mkt-c">Marketing</div>
+      <div class="kpi-cell-val mkt-c">8%</div>
+      <div class="kpi-cell-sub">QB / 12 target · 1 actual · CAC ~423M/QB</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-cell-label pn-c">Partnership</div>
+      <div class="kpi-cell-val pn-c">15%</div>
+      <div class="kpi-cell-sub">GP2 Realised / 5B target · 317M actual</div>
+    </div>
+  </div>
+
+  <!-- Shared Funnel -->
+  <div class="grid-2" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="card-title">Shared Funnel — BD + PN (Q2 QTD)</div>
+
+      <div style="display:grid;grid-template-columns:120px 1fr 80px 55px;gap:0.5rem;font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.4rem;">
+        <span>Stage</span><span></span><span style="text-align:right">Actual / Plan</span><span style="text-align:right">Run-rate</span>
+      </div>
+
+      <!-- BD funnel -->
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--bd);letter-spacing:0.06em;margin:0.4rem 0 0.2rem;text-transform:uppercase;">BD</div>
+      <div class="funnel-row"><span class="funnel-stage">Lead</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:40%;background:var(--bd)"></div></div><span class="funnel-nums">73 / 183</span><span class="funnel-rr warn">65%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Qualified Lead</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%;background:var(--bd)"></div></div><span class="funnel-nums">56 / 133</span><span class="funnel-rr up">117%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Brief (BE)</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:16%;background:var(--bd)"></div></div><span class="funnel-nums">7 / 44</span><span class="funnel-rr down">56%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Qualified Brief</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:26%;background:var(--bd)"></div></div><span class="funnel-nums">6 / 23</span><span class="funnel-rr warn">77%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Quotation Sent</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:22%;background:var(--bd)"></div></div><span class="funnel-nums">4 / 19</span><span class="funnel-rr warn">78%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Verbal Confirm</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:0%;background:var(--bd)"></div></div><span class="funnel-nums">0 / 8</span><span class="funnel-rr down">0%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Contract</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:0%;background:var(--bd)"></div></div><span class="funnel-nums">0 / 8</span><span class="funnel-rr down">0%</span></div>
+
+      <!-- PN funnel -->
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--pn);letter-spacing:0.06em;margin:0.75rem 0 0.2rem;text-transform:uppercase;">Partnership</div>
+      <div class="funnel-row"><span class="funnel-stage">SQL/Lead</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:35%;background:var(--pn)"></div></div><span class="funnel-nums">22 / 63</span><span class="funnel-rr warn">80%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Brief</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:38%;background:var(--pn)"></div></div><span class="funnel-nums">19 / 50</span><span class="funnel-rr up">87%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Qualified Brief</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:23%;background:var(--pn)"></div></div><span class="funnel-nums">10 / 44</span><span class="funnel-rr warn">52%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Quotation Sent</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:13%;background:var(--pn)"></div></div><span class="funnel-nums">5 / 39</span><span class="funnel-rr down">30%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Verbal Confirm</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:17%;background:var(--pn)"></div></div><span class="funnel-nums">3 / 17</span><span class="funnel-rr up">+3 NEW</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Contract</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:6%;background:var(--pn)"></div></div><span class="funnel-nums">1 / 16</span><span class="funnel-rr warn">+3 fcst</span></div>
+    </div>
+
+    <!-- MKT Funnel + KPI -->
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-title">MKT — Inbound Funnel (Q2 QTD)</div>
+        <div class="funnel-row"><span class="funnel-stage">SQL (Inbound)</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:53%;background:var(--mkt)"></div></div><span class="funnel-nums">64 / 120</span><span class="funnel-rr up">+13 WoW</span></div>
+        <div class="funnel-row"><span class="funnel-stage">Brief BE</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:17%;background:var(--mkt)"></div></div><span class="funnel-nums">4 / 23</span><span class="funnel-rr down">17%</span></div>
+        <div class="funnel-row"><span class="funnel-stage">QB</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:8%;background:var(--mkt)"></div></div><span class="funnel-nums">1 / 12</span><span class="funnel-rr down">8%</span></div>
+        <div class="funnel-row"><span class="funnel-stage">CAC/QB</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%;background:#ef4444aa"></div></div><span class="funnel-nums">~423M</span><span class="funnel-rr down">9× plan</span></div>
+        <div class="insight mkt-left" style="margin-top:0.75rem">55/64 SQLs là SME — chỉ 11 BE. CAC vẫn cao (~9× plan). Budget còn ~229M đang <strong>freeze</strong>. Cần align với anh Sơn: điều chỉnh KPI hoặc push thêm hoạt động BE.</div>
+      </div>
+
+      <!-- OKR Overview -->
+      <div class="card">
+        <div class="card-title">OKR Team Avg — W1 May</div>
+        <div style="display:flex;gap:1rem;margin-bottom:0.5rem">
+          <div style="flex:1;text-align:center">
+            <div class="stat-val bd-c" style="font-size:1.5rem">—</div>
+            <div class="stat-label">BD <span style="font-size:0.6rem">(no OKR reported)</span></div>
+          </div>
+          <div style="flex:1;text-align:center">
+            <div class="stat-val mkt-c" style="font-size:1.5rem">2.53</div>
+            <div class="stat-label">MKT <span class="up">▲ +0.35</span></div>
+          </div>
+          <div style="flex:1;text-align:center">
+            <div class="stat-val pn-c" style="font-size:1.5rem">2.66</div>
+            <div class="stat-label">PN <span class="up">▲ +0.33</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Red Flags / Green Lights -->
+  <div class="section-header">
+    <span class="section-badge badge-alert">Action Required</span>
+    <span class="section-title">CRO Attention Items</span>
+  </div>
+
+  <div class="red-flag">
+    <span class="rf-icon">🔴</span>
+    <div><strong>GP2 New cả 3 team đều dưới 20% QTD</strong> — Chỉ còn 5 tuần. BD 4%, MKT 3.5%, PN 15%. Cần quyết định: tăng activity hay điều chỉnh target?</div>
+  </div>
+  <div class="red-flag">
+    <span class="rf-icon">🔴</span>
+    <div><strong>BD: Verbal = 0, Contract = 0</strong> — 4 deal ở QS (Koasha 7B, Vifon 4B, Mitsubishi, Nha Khoa Tâm Đức 6.15B) đang treo. Nếu delay sang Q3 sẽ ảnh hưởng nặng.</div>
+  </div>
+  <div class="red-flag">
+    <span class="rf-icon">🔴</span>
+    <div><strong>MKT: QB không tăng 3 tuần liên tiếp</strong> — CAC 423M/QB vs plan 50M. Budget freeze. Cần direction: điều chỉnh KPI hoặc thêm hoạt động BE generation?</div>
+  </div>
+  <div class="red-flag">
+    <span class="rf-icon">🟡</span>
+    <div><strong>Techcombank Pitching (BD)</strong> — Tier-1 deal. Đại cần direction từ anh Sơn về angle, pricing strategy và resource POD trước khi finalize proposal.</div>
+  </div>
+
+  <div class="green-flag">
+    <span>✅</span>
+    <div><strong>PN Breakthrough:</strong> +3 Verbal Confirm tuần này (Tân Á Đại Thành, Datbike, Toshiba) — forecast +3 Contract trong 1–2 tuần. Lixco 7.5B đang R2.</div>
+  </div>
+  <div class="green-flag">
+    <span>✅</span>
+    <div><strong>BD: Kiến Á Execution confirmed</strong> — 1st payment ~800M GP2 sẽ phát sinh T5. Deal đầu tiên close GP2 Q2.</div>
+  </div>
+  <div class="green-flag">
+    <span>✅</span>
+    <div><strong>MKT: SQL +13 WoW</strong> — 64/120 (53.3%). Website GSC Clicks +44%, SEO position cải thiện 8.4→7.3. Tín hiệu tích cực nhất từ đầu Q2.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ BD PANEL ════════════════════════════════ -->
+<div class="panel" id="panel-bd">
+
+  <div class="section-header">
+    <span class="section-badge badge-bd">BD Team</span>
+    <span class="section-title">Performance Overview — Q2 W6</span>
+  </div>
+
+  <div class="grid-4">
+    <div class="card stat">
+      <div class="card-title">GP2 New QTD</div>
+      <div class="stat-val down">4%</div>
+      <div class="stat-label">125M / 2.93B target</div>
+      <div class="stat-sub down">Kiến Á +800M sẽ push lên</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">Activities (Q2)</div>
+      <div class="stat-val up">105%</div>
+      <div class="stat-label">1,496 / 1,420 plan</div>
+      <div class="stat-sub">Run-rate 242% 🚀</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">Qualified Lead</div>
+      <div class="stat-val up">117%</div>
+      <div class="stat-label">56 QL · run-rate tốt</div>
+      <div class="stat-sub">CR Lead→QL 77% (plan 73%)</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">Brief Volume</div>
+      <div class="stat-val down">56%</div>
+      <div class="stat-label">7 Brief / 44 plan</div>
+      <div class="stat-sub warn">Nhưng CR Brief→QB 86%</div>
+    </div>
+  </div>
+
+  <!-- Funnel Detail -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Full Funnel — BD (Q2 QTD, BE only)</div>
+      <div style="display:grid;grid-template-columns:130px 1fr 80px 55px 55px;gap:0.4rem;font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.5rem;padding-bottom:0.3rem;border-bottom:1px solid var(--border);">
+        <span>Stage</span><span></span><span style="text-align:right">Act/Plan</span><span style="text-align:right">RR</span><span style="text-align:right">CR%</span>
+      </div>
+      <div class="funnel-row"><span class="funnel-stage">Lead</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:40%;background:var(--bd)"></div></div><span class="funnel-nums">73/183</span><span class="funnel-rr warn">65%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Qualified Lead</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%;background:var(--bd)"></div></div><span class="funnel-nums">56/133</span><span class="funnel-rr up">117%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Brief (BE)</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:16%;background:#ef4444"></div></div><span class="funnel-nums">7/44</span><span class="funnel-rr down">56%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Qualified Brief</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:26%;background:var(--bd)"></div></div><span class="funnel-nums">6/23</span><span class="funnel-rr warn">77%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Quotation Sent</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:22%;background:var(--bd)"></div></div><span class="funnel-nums">4/19</span><span class="funnel-rr warn">78%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Verbal Confirm</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:1%;background:#ef4444"></div></div><span class="funnel-nums">0/8</span><span class="funnel-rr down">0%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Contract</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:1%;background:#ef4444"></div></div><span class="funnel-nums">0/8</span><span class="funnel-rr down">0%</span></div>
+      <div class="funnel-row"><span class="funnel-stage">Execution</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%;background:var(--green)"></div></div><span class="funnel-nums">1 (Kiến Á)</span><span class="funnel-rr up">800M</span></div>
+    </div>
+
+    <!-- Key Accounts -->
+    <div class="card">
+      <div class="card-title">Key Accounts — Hot Pipeline</div>
+      <div class="item-row">
+        <div><div class="item-name">Techcombank</div><div class="item-sub">Media Agency Retainer 2026 · Tier-1 deal</div></div>
+        <div class="item-tag tag-warn">⚡ Cần direction anh Sơn</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Koasha Lixco Bondy</div><div class="item-sub">7B — QS, đã gửi báo giá · đợi feedback pitching</div></div>
+        <div class="item-tag tag-blue">QS</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Vifon</div><div class="item-sub">4B / 880M GP2 — đang qualify lên QB (Ngọc)</div></div>
+        <div class="item-tag tag-blue">QB push</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Nha Khoa Sài Gòn Tâm Đức</div><div class="item-sub">6.15B rev — present Round 1, đợi chốt budget</div></div>
+        <div class="item-tag tag-warn">QS pending</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Mitsubishi (Raizeone)</div><div class="item-sub">QS xong · đợi brand duyệt nội bộ (Ngọc)</div></div>
+        <div class="item-tag tag-blue">QS</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Kiến Á</div><div class="item-sub">Execution ✅ · 1st payment ~800M GP2</div></div>
+        <div class="item-tag tag-green">Execution</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Novaland Phan Thiết</div><div class="item-sub">Đã ký NDA · đang process hồ sơ nhận brief</div></div>
+        <div class="item-tag tag-gray">NDA signed</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Manulife</div><div class="item-sub">QB 24.5B — carry-over Q1, đang nurture (My)</div></div>
+        <div class="item-tag tag-warn">QB nurture</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vertical & Key Learning -->
+  <div class="section-header" style="margin-top:1.5rem">
+    <span class="section-badge badge-bd">Insights</span>
+    <span class="section-title">Key Learning & Market Insights</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Top Vertical — Q2 Performance</div>
+      <div class="item-row">
+        <div><div class="item-name">Healthcare</div><div class="item-sub">23 cty · 692 activities · CR Lead→QL 91%</div></div>
+        <div class="item-tag tag-green">Vertical lớn nhất</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Real Estate</div><div class="item-sub">8 cty · 115 acts · CR 88% · Kiến Á execution</div></div>
+        <div class="item-tag tag-warn">Luxury gap!</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">FMCG</div><div class="item-sub">11 cty · Vifon 4B deal lớn nhất Q2</div></div>
+        <div class="item-tag tag-blue">Budget shift Q3</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Auto</div><div class="item-sub">3 cty · freq/client 20.62 — cao nhất · Thaco, BYD</div></div>
+        <div class="item-tag tag-blue">High engagement</div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Finance</div><div class="item-sub">TCB pitching · Manulife 24.5B QB</div></div>
+        <div class="item-tag tag-warn">Cycle 6–9 tháng</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Market Insights & Key Learning</div>
+      <div class="insight bd-left">🏠 <strong>Real Estate Luxury Gap:</strong> Prospect BDS cao cấp (Phú Mỹ Hưng Hồng Hạc City) nghi ngờ năng lực của PMAX do case study chủ yếu phân khúc mass. Cần build case study hoặc offer riêng cho luxury — không dùng deck BDS mass.</div>
+      <div class="insight bd-left" style="margin-top:0.5rem">🏭 <strong>FMCG đồ uống:</strong> Chính sách thuế đường đang tạo làn sóng repositioning. Budget dự kiến nở Q3. Brand đang shift từ global về local agency.</div>
+      <div class="insight bd-left" style="margin-top:0.5rem">🔑 <strong>Source tốt nhất:</strong> Relationship Direct (CR lead→brief 67%) — chất lượng cao hơn Scrapping Social dù volume thấp hơn. Referral flywheel bắt đầu quay (Re Green từ Nha Khoa Việt Mỹ).</div>
+    </div>
+  </div>
+
+  <!-- Next Week BD -->
+  <div class="section-header" style="margin-top:1.5rem">
+    <span class="section-badge badge-bd">Tuần 7</span>
+    <span class="section-title">Next Week Priorities (11–17/05)</span>
+  </div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title" style="color:var(--bd)">Priority 1 — Strategic Align</div>
+      <div class="item-row"><div><div class="item-name">Techcombank direction</div><div class="item-sub">1:1 với anh Sơn · angle, pricing, resource POD</div></div></div>
+      <div class="item-row"><div><div class="item-name">Vertical re-org BD</div><div class="item-sub">Discuss assignment Chaebol mapping với anh Sơn</div></div></div>
+      <div class="item-row"><div><div class="item-name">Training BD team</div><div class="item-sub">Confirm lịch 2 buổi · tuần 7</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--bd)">Priority 2 — Pipeline & Brief</div>
+      <div class="item-row"><div><div class="item-name">Domesco</div><div class="item-sub">Push họp Repositioning · confirm UGC — deadline 14/5 (My)</div></div></div>
+      <div class="item-row"><div><div class="item-name">Phú Mỹ Hưng + Zeiss + Thaco</div><div class="item-sub">3 meetings clarify brief T2 (11/5) — Phương</div></div></div>
+      <div class="item-row"><div><div class="item-name">Vifon</div><div class="item-sub">Chốt scope, đẩy QB — Ngọc</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--bd)">Priority 3 — TOF & System</div>
+      <div class="item-row"><div><div class="item-name">Scraping 10 Lead mới</div><div class="item-sub">Theo Leadgen direction anh Sơn · deadline 16/5 (My)</div></div></div>
+      <div class="item-row"><div><div class="item-name">4 QL mới từ shortlist</div><div class="item-sub">Deadline 16/5 · My</div></div></div>
+      <div class="item-row"><div><div class="item-name">Vendor list</div><div class="item-sub">Map MKT PIC 10 cty ưu tiên · deadline 15/5</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ MKT PANEL ════════════════════════════════ -->
+<div class="panel" id="panel-mkt">
+
+  <div class="section-header">
+    <span class="section-badge badge-mkt">Marketing</span>
+    <span class="section-title">Performance Overview — W1 May 2026</span>
+  </div>
+
+  <div class="grid-4">
+    <div class="card stat">
+      <div class="card-title">QB (Q2 QTD)</div>
+      <div class="stat-val down">8%</div>
+      <div class="stat-label">1 / 12 target</div>
+      <div class="stat-sub down">Không tăng 3 tuần liên tiếp</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">SQL Inbound</div>
+      <div class="stat-val up">53%</div>
+      <div class="stat-label">64 / 120 · +13 WoW</div>
+      <div class="stat-sub up">Tín hiệu tích cực nhất Q2</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">CAC / QB</div>
+      <div class="stat-val down">~423M</div>
+      <div class="stat-label">Plan: 50M/QB</div>
+      <div class="stat-sub down">Giảm từ 504M nhờ Pinpoint 162M</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">Budget còn lại</div>
+      <div class="stat-val warn">~229M</div>
+      <div class="stat-label">Q2 remaining · đang freeze</div>
+      <div class="stat-sub">Pending QB mới trước khi chi</div>
+    </div>
+  </div>
+
+  <!-- OKR + Channel -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">OKR — Individual (W1 May)</div>
+      <div class="member-row hdr">
+        <span>Member</span><span>OKR</span><span>WoW</span><span>QB</span><span>Brief BE</span><span>SQL</span>
+      </div>
+      <div class="member-row">
+        <span class="member-name">Tố Trân</span>
+        <span class="member-okr mkt-c">3.09/5</span>
+        <span class="member-stat up">▲ +0.31</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+      </div>
+      <div class="member-row">
+        <span class="member-name">Tuyết Vân</span>
+        <span class="member-okr mkt-c">2.46/5</span>
+        <span class="member-stat up">▲ +0.73</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+      </div>
+      <div class="member-row">
+        <span class="member-name">Minh Huy</span>
+        <span class="member-okr mkt-c">2.05/5</span>
+        <span class="member-stat up">▲ +0.03</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+      </div>
+      <div class="member-row" style="border-top:1px solid var(--muted);margin-top:0.3rem;padding-top:0.5rem">
+        <span class="member-name" style="color:var(--mkt)">Team Avg</span>
+        <span class="member-okr mkt-c">2.53/5</span>
+        <span class="member-stat up">▲ +0.35</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+        <span class="member-stat">—</span>
+      </div>
+      <div class="insight mkt-left" style="margin-top:0.75rem">Website Traffic & SEO bài là bottleneck chính (14,775/34,746 — 30%). Ảnh hưởng OKR Tuyết Vân nhiều nhất.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Channel Performance — WoW</div>
+      <div class="item-row"><div><div class="item-name">Facebook</div><div class="item-sub">Visit +64% · Follower +64% · OKR Engagement vượt 145%</div></div><span class="item-tag tag-green">Tốt</span></div>
+      <div class="item-row"><div><div class="item-name">LinkedIn</div><div class="item-sub">Impression +60% · Clicks +24% · Follower +33%</div></div><span class="item-tag tag-green">Phục hồi</span></div>
+      <div class="item-row"><div><div class="item-name">Website / SEO</div><div class="item-sub">GSC Clicks +44% · Avg Engagement +25% · Position 7.3</div></div><span class="item-tag tag-warn">Traffic 30% target</span></div>
+      <div class="item-row"><div><div class="item-name">TikTok</div><div class="item-sub">3 bài · về organic baseline sau viral W4</div></div><span class="item-tag tag-gray">Build stage</span></div>
+      <div class="item-row"><div><div class="item-name">YouTube</div><div class="item-sub">Views +167% (267 vs 100) · Watch time ổn định</div></div><span class="item-tag tag-green">▲</span></div>
+      <div class="item-row"><div><div class="item-name">Paid Media</div><div class="item-sub">Ebook FMCG kết thúc: 126 leads, CPL 76k · Đang freeze</div></div><span class="item-tag tag-warn">Freeze</span></div>
+    </div>
+  </div>
+
+  <!-- Projects -->
+  <div class="section-header" style="margin-top:1.5rem">
+    <span class="section-badge badge-mkt">Projects</span>
+    <span class="section-title">Workstream Update</span>
+  </div>
+
+  <div class="card">
+    <div class="ws-row header-row"><span>Project</span><span>Owner</span><span>Status</span></div>
+    <div class="ws-row">
+      <div><div class="ws-name">PMAX AI Webinar (16/05)</div><div class="ws-owner">KV, social post, LDP done — nhưng pending mục tiêu chưa rõ, cần xây lại thành series</div></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Huy</span>
+      <span class="ws-status-pill tag-warn">PENDING</span>
+    </div>
+    <div class="ws-row">
+      <div><div class="ws-name">Sales Kits / Credential</div><div class="ws-owner">Ưu tiên chính tuần tới — hỗ trợ BD kiếm khách</div></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">All team</span>
+      <span class="ws-status-pill tag-blue">IN PROG</span>
+    </div>
+    <div class="ws-row">
+      <div><div class="ws-name">Ebook Home 2026</div><div class="ws-owner">Social post 2 done · LDP launched · đợi duyệt để launch — out of date vs plan</div></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Huy</span>
+      <span class="ws-status-pill tag-warn">DELAYED</span>
+    </div>
+    <div class="ws-row">
+      <div><div class="ws-name">Marketing OS</div><div class="ws-owner">Test data & optimize logic hệ thống</div></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Tố Trân</span>
+      <span class="ws-status-pill tag-blue">IN PROG</span>
+    </div>
+    <div class="ws-row">
+      <div><div class="ws-name">Meta Webinar Post-Event</div><div class="ws-owner">553 đăng ký · 363 tham dự (71.2%) · 64 Whitelist · 18 tư vấn 1:1</div></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Team</span>
+      <span class="ws-status-pill tag-green">DONE</span>
+    </div>
+    <div class="ws-row">
+      <div><div class="ws-name">MKT Brief Form (nội bộ)</div><div class="ws-owner">Đã hoàn thành · cần anh Sơn review & điều chỉnh</div></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Tố Trân</span>
+      <span class="ws-status-pill tag-warn">REVIEW</span>
+    </div>
+  </div>
+
+  <div class="red-flag" style="margin-top:1rem">
+    <span>🔴</span>
+    <div><strong>Align với anh Sơn required:</strong> MKT cần quyết định về hướng xử lý QB gap — điều chỉnh KPI hay push thêm hoạt động tạo lead BE từ nay đến hết T6. Và direction mới cho PMAX AI Webinar.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ PARTNERSHIP PANEL ════════════════════════════════ -->
+<div class="panel" id="panel-pn">
+
+  <div class="section-header">
+    <span class="section-badge badge-pn">Partnership</span>
+    <span class="section-title">Performance Overview — W5 Q2.2026</span>
+  </div>
+
+  <div class="grid-4">
+    <div class="card stat">
+      <div class="card-title">Team OKR Avg</div>
+      <div class="stat-val pn-c">2.66</div>
+      <div class="stat-label">▲ +0.33 vs W4</div>
+      <div class="stat-sub up">All members improving</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">Verbal Confirm</div>
+      <div class="stat-val up">+3 NEW</div>
+      <div class="stat-label">Tân Á · Datbike · Toshiba</div>
+      <div class="stat-sub up">Forecast +3 Contract 1-2 tuần</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">GP2 Active QB</div>
+      <div class="stat-val pn-c">22.4B</div>
+      <div class="stat-label">108% target</div>
+      <div class="stat-sub up">Stable</div>
+    </div>
+    <div class="card stat">
+      <div class="card-title">MOU Signed</div>
+      <div class="stat-val pn-c">8/10</div>
+      <div class="stat-label">80% target · ▲ +1</div>
+      <div class="stat-sub">+2 forecast cuối T5</div>
+    </div>
+  </div>
+
+  <!-- Member Breakdown + Funnel -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Per-Member Performance</div>
+      <div class="member-row hdr">
+        <span>Member</span><span>OKR</span><span>Brief %</span><span>Mtg %</span><span>GP2 QB</span><span>KPI%</span>
+      </div>
+      <div class="member-row">
+        <div><span class="member-name">Phát</span><div style="font-size:0.65rem;color:var(--text-dim)">Manager · Active BE</div></div>
+        <span class="member-okr pn-c">2.29</span>
+        <span class="member-stat warn">87%</span>
+        <span class="member-stat warn">81%</span>
+        <span class="member-stat pn-c">22.4B</span>
+        <span class="member-stat down">12.8%</span>
+      </div>
+      <div class="member-row">
+        <div><span class="member-name">Minh Thư</span><div style="font-size:0.65rem;color:var(--text-dim)">PE · Active BE</div></div>
+        <span class="member-okr pn-c">2.43</span>
+        <span class="member-stat down">58%</span>
+        <span class="member-stat down">54%</span>
+        <span class="member-stat pn-c">15.6B</span>
+        <span class="member-stat warn">19.7%</span>
+      </div>
+      <div class="member-row">
+        <div><span class="member-name">Gia Bảo ⭐</span><div style="font-size:0.65rem;color:var(--text-dim)">PE · Top Performer 4 tuần</div></div>
+        <span class="member-okr pn-c">3.27</span>
+        <span class="member-stat up">127%</span>
+        <span class="member-stat up">138%</span>
+        <span class="member-stat pn-c">6.8B</span>
+        <span class="member-stat warn">32%</span>
+      </div>
+    </div>
+
+    <!-- Bottom Funnel Detail -->
+    <div class="card">
+      <div class="card-title">Bottom Funnel — Cases đang xử lý</div>
+      <div class="item-row">
+        <div><div class="item-name">Tân Á Đại Thành</div><div class="item-sub">VC ✅ · Process contract · 11/5 review HĐ (Gia Bảo)</div></div>
+        <span class="item-tag tag-green">VERBAL</span>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Datbike</div><div class="item-sub">VC ✅ · Đang process contract (Gia Bảo)</div></div>
+        <span class="item-tag tag-green">VERBAL</span>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Toshiba</div><div class="item-sub">VC ✅ · Dự kiến ký 20/06 (Minh Thư)</div></div>
+        <span class="item-tag tag-green">VERBAL</span>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Lixco — Bondy Care 🔥</div><div class="item-sub">Đã gửi R2 (7.5B) · GP2 lớn nhất pipeline · đợi KH phản hồi</div></div>
+        <span class="item-tag tag-warn">QS R2</span>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">TP-Link · Hateco · HSV</div><div class="item-sub">QB/QS · đang assign POD Lead để làm quotation</div></div>
+        <span class="item-tag tag-blue">QB/QS</span>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Prudential</div><div class="item-sub">QS sent 29.4 · đang chờ confirmation từ KH</div></div>
+        <span class="item-tag tag-warn">QS pending</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Strategic Insights PN -->
+  <div class="section-header" style="margin-top:1.5rem">
+    <span class="section-badge badge-pn">Insights</span>
+    <span class="section-title">Strategic Partner Highlights</span>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title pn-c">Dentsu Creative (NEW)</div>
+      <div class="insight pn-left">Creative-only agency (Cannes Lions 2022). Thiếu Influencer/Live Commerce/UGC arm. PMAX fill gap này → co-pitch cho Beauty, FMCG, Healthcare clients của Dentsu.</div>
+    </div>
+    <div class="card">
+      <div class="card-title pn-c">Biweb + Vtech Pattern</div>
+      <div class="insight pn-left">Cả 2 partner đang đưa PMAX vào nhóm "Traditional Strong Clients" — offline-dominant, digital-weak. Blue ocean: FISA, EVN, Mazda Thảo Điền, Tân Thanh Container. Cần meeting với anh Cường + anh Sơn.</div>
+    </div>
+    <div class="card">
+      <div class="card-title pn-c">Informa Markets (NEW)</div>
+      <div class="insight pn-left">Co-branding opportunity tại exhibition Beauty & Health. ~20% audience là D&C-level marketers — đúng ICP của PMAX. Cần internal đánh giá: Strategic fit? Resource speaker bench? Commercial logic?</div>
+    </div>
+  </div>
+
+  <!-- Next Week PN -->
+  <div class="section-header" style="margin-top:1.5rem">
+    <span class="section-badge badge-pn">Tuần 6</span>
+    <span class="section-title">Next Week Priorities (11–17/05)</span>
+  </div>
+
+  <div class="card">
+    <div class="ws-row header-row"><span>Action</span><span>Owner</span><span>Priority</span></div>
+    <div class="ws-row"><div><div class="ws-name">VC → Contract sprint</div><div class="ws-owner">Process contract Tân Á, Datbike, Toshiba · track Payment Term & Legal daily</div></div><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Gia Bảo / Thư</span><span class="ws-status-pill tag-danger">P1</span></div>
+    <div class="ws-row"><div><div class="ws-name">Lixco (Bondy Care) R2 follow-up</div><div class="ws-owner">GP2 lớn nhất · weekly catch-up KH, daily check internal account team</div></div><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Minh Thư</span><span class="ws-status-pill tag-danger">P1</span></div>
+    <div class="ws-row"><div><div class="ws-name">Meeting anh Cường + anh Sơn</div><div class="ws-owner">Traditional Strong Clients strategy · 3 approach options (Diagnose-First / Trojan Horse / Co-Built CMO)</div></div><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Phát</span><span class="ws-status-pill tag-warn">P2</span></div>
+    <div class="ws-row"><div><div class="ws-name">Informa Markets evaluation</div><div class="ws-owner">Internal assess co-branding event fit + decide next step</div></div><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Phát</span><span class="ws-status-pill tag-warn">P2</span></div>
+    <div class="ws-row"><div><div class="ws-name">MOU push to 10/10</div><div class="ws-owner">Close 2 partners còn lại trong T5</div></div><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">All</span><span class="ws-status-pill tag-blue">P3</span></div>
+    <div class="ws-row"><div><div class="ws-name">Vertical Mapping starter</div><div class="ws-owner">List 2 associations × 6 verticals = 12 targets · kick off 90-day roadmap</div></div><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">Phát</span><span class="ws-status-pill tag-blue">P3</span></div>
+    <div class="ws-row"><div><div class="ws-name">AI Agent ideation session</div><div class="ws-owner">Thư & Bảo present scope cho Phát · consolidate Q2 Self-Dev OKR</div></div><span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dim)">All PN</span><span class="ws-status-pill tag-gray">OKR</span></div>
+  </div>
+</div>
+
+<div class="edit-toolbar">
+  <div class="edit-pulse" id="editPulse"></div>
+  <button class="edit-btn edit-btn-toggle" id="editToggle" onclick="toggleEditMode()">✏️ Edit Mode</button>
+  <button class="edit-btn edit-btn-save" id="saveBtn" onclick="saveFile()">💾 Save HTML</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  const panels = ['all', 'bd', 'mkt', 'pn'];
+  const tabClasses = { all: 'active-all', bd: 'active-bd', mkt: 'active-mkt', pn: 'active-pn' };
+
+  function switchTab(id) {
+    panels.forEach(p => {
+      document.getElementById('panel-' + p).classList.remove('active');
+    });
+    document.querySelectorAll('.tab').forEach((t, i) => { t.className = 'tab'; });
+    document.getElementById('panel-' + id).classList.add('active');
+    const tabs = document.querySelectorAll('.tab');
+    const idx = panels.indexOf(id);
+    tabs[idx].classList.add(tabClasses[id]);
+  }
+
+  /* ── EDIT MODE ── */
+  let editActive = false;
+
+  function toggleEditMode() {
+    editActive = !editActive;
+    document.body.classList.toggle('edit-mode', editActive);
+    const btn = document.getElementById('editToggle');
+    const save = document.getElementById('saveBtn');
+    const pulse = document.getElementById('editPulse');
+    btn.classList.toggle('active', editActive);
+    btn.textContent = editActive ? '✏️ Editing...' : '✏️ Edit Mode';
+    save.style.display = editActive ? 'inline-block' : 'none';
+    pulse.style.display = editActive ? 'block' : 'none';
+
+    if (editActive) {
+      makeEditable();
+      addDeleteHandles();
+      addAddRowBtns();
+      showToast('Edit mode ON — click any text/number to edit');
+    } else {
+      showToast('Edit mode OFF');
+    }
+  }
+
+  function makeEditable() {
+    /* All text nodes that aren't already editable */
+    const selectors = [
+      '.stat-val', '.stat-label', '.stat-sub',
+      '.kpi-cell-val', '.kpi-cell-sub', '.kpi-cell-label',
+      '.item-name', '.item-sub', '.item-tag',
+      '.funnel-nums', '.funnel-rr', '.funnel-stage',
+      '.ws-name', '.ws-owner', '.ws-status-pill',
+      '.member-name', '.member-okr', '.member-stat',
+      '.insight', '.card-title',
+      '.red-flag div', '.green-flag div',
+      '.section-title', '.header-left h1', '.header-left p', '.header-right',
+    ];
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        if (!el.hasAttribute('contenteditable') && !el.closest('.hdr') && !el.closest('.header-row')) {
+          el.setAttribute('contenteditable', 'true');
+          el.setAttribute('data-editable', '1');
+          el.setAttribute('spellcheck', 'false');
+        }
+      });
+    });
+
+    /* Funnel bars — drag to resize */
+    document.querySelectorAll('.funnel-bar').forEach(bar => {
+      if (bar.dataset.barInit) return;
+      bar.dataset.barInit = '1';
+      bar.title = 'Drag to resize %';
+      bar.style.cursor = 'ew-resize';
+      let startX, startW;
+      bar.addEventListener('mousedown', e => {
+        e.preventDefault();
+        startX = e.clientX;
+        startW = parseFloat(bar.style.width) || 0;
+        const onMove = ev => {
+          const wrap = bar.parentElement.getBoundingClientRect();
+          let pct = Math.round(((ev.clientX - wrap.left) / wrap.width) * 100);
+          pct = Math.min(100, Math.max(0, pct));
+          bar.style.width = pct + '%';
+        };
+        const onUp = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+    });
+  }
+
+  function addDeleteHandles() {
+    const deletable = ['.item-row', '.ws-row:not(.header-row)', '.funnel-row', '.red-flag', '.green-flag', '.member-row:not(.hdr)'];
+    deletable.forEach(sel => {
+      document.querySelectorAll(sel).forEach(row => {
+        if (row.querySelector('.del-handle')) return;
+        const x = document.createElement('span');
+        x.className = 'del-handle';
+        x.textContent = '✕';
+        x.title = 'Delete row';
+        x.onclick = () => row.remove();
+        row.appendChild(x);
+      });
+    });
+  }
+
+  function addAddRowBtns() {
+    /* Add-row buttons at the bottom of card lists */
+    const containers = [
+      { parent: '#panel-bd .card:nth-child(2)', label: '+ Add account' },
+    ];
+
+    document.querySelectorAll('.card').forEach(card => {
+      if (card.querySelector('.add-row-btn')) return;
+      const rows = card.querySelectorAll('.item-row, .funnel-row, .ws-row:not(.header-row)');
+      if (rows.length === 0) return;
+      const type = rows[0].classList.contains('funnel-row') ? 'funnel' :
+                   rows[0].classList.contains('ws-row') ? 'ws' : 'item';
+      const btn = document.createElement('button');
+      btn.className = 'add-row-btn';
+      btn.textContent = '+ Add row';
+      btn.onclick = () => addNewRow(card, type, rows[0]);
+      card.appendChild(btn);
+    });
+
+    /* Red/green flag sections */
+    ['red-flag', 'green-flag'].forEach(cls => {
+      const items = document.querySelectorAll('.' + cls);
+      if (!items.length) return;
+      const last = items[items.length - 1];
+      const btn = document.createElement('button');
+      btn.className = 'add-row-btn';
+      btn.textContent = '+ Add flag';
+      btn.onclick = () => {
+        const clone = last.cloneNode(true);
+        clone.querySelector('div').textContent = 'New item — click to edit';
+        last.parentNode.insertBefore(clone, btn);
+        makeEditable();
+        addDeleteHandles();
+      };
+      last.parentNode.insertBefore(btn, last.nextSibling);
+    });
+  }
+
+  function addNewRow(card, type, template) {
+    const clone = template.cloneNode(true);
+    clone.querySelectorAll('[contenteditable]').forEach(el => { el.textContent = '—'; });
+    clone.querySelectorAll('.del-handle').forEach(el => el.remove());
+    const addBtn = card.querySelector('.add-row-btn');
+    card.insertBefore(clone, addBtn);
+    makeEditable();
+    addDeleteHandles();
+    clone.querySelector('[contenteditable]')?.focus();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function saveFile() {
+    /* Temporarily remove edit UI before capture */
+    const toolbar = document.querySelector('.edit-toolbar');
+    const toast = document.getElementById('toast');
+    const addBtns = document.querySelectorAll('.add-row-btn');
+    const delHandles = document.querySelectorAll('.del-handle');
+    toolbar.style.display = 'none';
+    toast.style.display = 'none';
+    addBtns.forEach(b => b.style.display = 'none');
+    delHandles.forEach(h => h.style.display = 'none');
+
+    /* Strip contenteditable attrs from clone */
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML
+      .replace(/ contenteditable="true"/g, '')
+      .replace(/ data-editable="1"/g, '')
+      .replace(/ spellcheck="false"/g, '');
+
+    /* Restore */
+    toolbar.style.display = '';
+    toast.style.display = '';
+    addBtns.forEach(b => b.style.display = '');
+    delHandles.forEach(h => { if(editActive) h.style.display = ''; });
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cro-dashboard-edited.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('Saved! File downloaded.');
+  }
+</script>
+
+</body>
+</html>
